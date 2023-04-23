@@ -1,0 +1,15 @@
+language,text,intent
+en,Hello,hello
+en,How are you?,howareyou
+en,I'm doing fine,fine
+en,What's your name?,greetings.name
+en,Goodbye,bye
+en,Thanks,thanks
+en,What can you do?,capabilities
+en,Who created you?,creator
+en,Where are you from?,origin
+en,What is your purpose?,purpose
+en,Can you help me?,help
+en,How old are you?,age
+en,What time is it?,time
+en,greetings.name,I'm a chatbot!
