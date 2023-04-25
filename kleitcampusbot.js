@@ -1,68 +1,50 @@
+const express = require('express');
+const bodyParser = require('body-parser');
 const { NlpManager } = require('node-nlp');
-const readline = require('readline');
+const csv = require('csv-parser');
+const fs = require('fs');
 
 // Create a new NLP manager
 const manager = new NlpManager({ languages: ['en'] });
 
-// Train the NLP manager with some sample data
-manager.addDocument('en', 'hi', 'greetings.hello');
-manager.addDocument('en', 'hello', 'greetings.hello');
-manager.addDocument('en', 'how are you', 'greetings.howareyou');
-manager.addDocument('en', 'fine', 'greetings.fine');
-manager.addDocument('en', 'what is your name', 'greetings.name');
-manager.addDocument('en', 'bye', 'greetings.bye');
-manager.addDocument('en', 'see you later', 'greetings.bye');
-manager.addDocument('en', 'goodbye', 'greetings.bye');
-manager.addDocument('en', 'thanks', 'greetings.thanks');
-manager.addDocument('en', 'thank you', 'greetings.thanks');
-manager.addDocument('en', 'quit', 'exit');
+// Read the document CSV file and add documents to the NLP manager
+fs.createReadStream('questions.csv')
+  .pipe(csv())
+  .on('data', (row) => {
+    const { language, text, intent } = row;
+    manager.addDocument(language, text, intent);
+  })
+  .on('end', () => {
+    console.log('Documents added to NLP manager');
+    // Read the answer CSV file and add answers to the NLP manager
+    fs.createReadStream('answers.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        const { language, intent, answer } = row;
+        manager.addAnswer(language, intent, answer);
+      })
+      .on('end', () => {
+        console.log('Answers added to NLP manager');
+        manager.train();
+      });
+  });
 
+const app = express();
+app.use(bodyParser.json());
 
-// Need to add similar Train sample data
-manager.addDocument('en', 'What majors do you offer?', 'college.majors');
-manager.addDocument('en', 'Can you tell me about your tuition fees?', 'college.tuition');
-manager.addDocument('en', 'What is the application process like?', 'college.application');
-manager.addDocument('en', 'Do you have any scholarships available?', 'college.scholarships');
-manager.addDocument('en', 'What extracurricular activities are offered?', 'college.activities');
-
-// Train the NLP manager
-manager.train();
-
-// Add some responses for the "greetings.name" intent
-manager.addAnswer('en', 'greetings.hello', "hello");
-manager.addAnswer('en', 'greetings.name', "I'm a chatbot!");
-manager.addAnswer('en', 'greetings.howareyou', "fine");
-manager.addAnswer('en', 'greetings.bye', "good bye");
-manager.addAnswer('en', 'greetings.thanks', "thank you");
-
-// Need to add some responses
-manager.addAnswer('en', 'college.majors', 'We offer a wide range of majors including Business, Engineering, and Computer Science.');
-manager.addAnswer('en', 'college.tuition', 'Our tuition fees vary based on the program and degree level. You can find more information on our website.');
-manager.addAnswer('en', 'college.application', 'The application process involves submitting your transcripts, test scores, and an essay. You can find more information on our website.');
-manager.addAnswer('en', 'college.scholarships', 'Yes, we offer several scholarships for students who demonstrate academic excellence and financial need. You can find more information on our website.');
-manager.addAnswer('en', 'college.activities', 'We have a variety of clubs and organizations for students to get involved in including sports teams, music groups, and academic clubs.');
-
-
-
-// Create a function to handle user input
-async function handleInput(input) {
-//   console.log(`Received input: ${input}`);
-  const response = await manager.process('en', input);
-//   console.log(`Response: ${JSON.stringify(response)}`);
+// Handle incoming chatbot requests
+app.post('/chat', async (req, res) => {
+  const response = await manager.process('en', req.body.message);
   if (response.intent === 'exit') {
-    console.log('Exiting chatbot...');
-    process.exit();
+    res.json({ message: 'Exiting chatbot...' });
   } else {
-    console.log(response.answer || "I'm not sure what you mean.");
+    res.json({ message: response.answer || "I'm not sure what you mean." });
   }
-}
+});
 
-// Start a conversation with the chatbot
-console.log('Type "quit" to exit.');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
+// Serve the chatbot UI
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/index.html');
 });
-rl.on('line', async (input) => {
-  await handleInput(input.trim());
-});
+
+app.listen(3000, () => console.log('Chatbot listening on port 3000!'));

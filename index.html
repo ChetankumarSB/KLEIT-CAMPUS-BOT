@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chatbot Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>KLEIT Campus Bots</h1>
+          <br>
+          <div id="chat"></div>
+          <div class="input-group">
+            <input type="text" class="form-control" id="message" placeholder="Type your message...">
+            <div class="input-group-btn">
+              <button type="button" class="btn btn-primary pull-right" id="send">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+      $(function() {
+        var chat = $('#chat');
+        var message = $('#message');
+        var send = $('#send');
+        send.on('click', function() {
+          var text = message.val();
+          message.val('');
+          chat.append('<p class="bg-info text-right">' + text + '</p>');
+          $.ajax({
+            type: 'POST',
+            url: '/chat',
+            data: JSON.stringify({ message: text }),
+            contentType: 'application/json',
+            success: function(response) {
+              chat.append('<p class="bg-success">' + response.message + '</p>');
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

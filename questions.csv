@@ -1,0 +1,18 @@
+language,text,intent
+en,hi,greetings.hello
+en,hay,greetings.hello
+en,hai,greetings.hello
+en,hello,greetings.hello
+en,morning,greetings.goodmorning
+en,good morning,greetings.goodmorning
+en,good afternoon,greetings.goodafternoon
+en,good evening,greetings.goodevening
+en,how do you do,greetings.well
+en,how are you,greetings.fine
+en,bye,greetings.bye
+en,ok,greetings.ok
+en,well,greetings.ok
+en,hi,greetings.hello
+en,hi,greetings.hello
+en,hi,greetings.hello
+en,hi,greetings.hello
